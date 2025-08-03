@@ -23,14 +23,13 @@ class CombustivelProvider extends ChangeNotifier {
   Future<void> carregarLancamentos() async {
     final timer = _monitor.startTimer('load_lancamentos');
     _setLoading(true);
-    
+
     try {
       _lancamentos = await _service.buscarLancamentos();
       _error = null;
-      
+
       // Auto-sync se necessário
       _triggerAutoSync();
-      
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -47,7 +46,7 @@ class CombustivelProvider extends ChangeNotifier {
   ) async {
     final timer = _monitor.startTimer('load_periodo');
     _setLoading(true);
-    
+
     try {
       _lancamentos = await _service.buscarLancamentosPorPeriodo(inicio, fim);
       _error = null;
@@ -64,7 +63,7 @@ class CombustivelProvider extends ChangeNotifier {
   Future<void> carregarLancamentosPorConfinamento(String confinamentoId) async {
     final timer = _monitor.startTimer('load_confinamento');
     _setLoading(true);
-    
+
     try {
       _lancamentos = await _service.buscarLancamentosPorConfinamento(
         confinamentoId,
@@ -83,7 +82,7 @@ class CombustivelProvider extends ChangeNotifier {
   Future<bool> criarLancamento(LancamentoCombustivel lancamento) async {
     final timer = _monitor.startTimer('create_lancamento');
     _setLoading(true);
-    
+
     try {
       // Validar lançamento
       final erros = await _service.validarLancamento(lancamento);
@@ -95,10 +94,10 @@ class CombustivelProvider extends ChangeNotifier {
       final novoLancamento = await _service.criarLancamento(lancamento);
       _lancamentos.insert(0, novoLancamento);
       _error = null;
-      
+
       // Add to sync queue for offline support
       await _syncService.addPendingChange('create', novoLancamento.toJson());
-      
+
       return true;
     } catch (e) {
       _error = e.toString();
@@ -114,7 +113,7 @@ class CombustivelProvider extends ChangeNotifier {
   Future<bool> atualizarLancamento(LancamentoCombustivel lancamento) async {
     final timer = _monitor.startTimer('update_lancamento');
     _setLoading(true);
-    
+
     try {
       // Validar lançamento
       final erros = await _service.validarLancamento(lancamento);
@@ -131,10 +130,13 @@ class CombustivelProvider extends ChangeNotifier {
         _lancamentos[index] = lancamentoAtualizado;
       }
       _error = null;
-      
+
       // Add to sync queue
-      await _syncService.addPendingChange('update', lancamentoAtualizado.toJson());
-      
+      await _syncService.addPendingChange(
+        'update',
+        lancamentoAtualizado.toJson(),
+      );
+
       return true;
     } catch (e) {
       _error = e.toString();
@@ -150,15 +152,15 @@ class CombustivelProvider extends ChangeNotifier {
   Future<bool> deletarLancamento(String id) async {
     final timer = _monitor.startTimer('delete_lancamento');
     _setLoading(true);
-    
+
     try {
       await _service.deletarLancamento(id);
       _lancamentos.removeWhere((l) => l.id == id);
       _error = null;
-      
+
       // Add to sync queue
       await _syncService.addPendingChange('delete', {'id': id});
-      
+
       return true;
     } catch (e) {
       _error = e.toString();

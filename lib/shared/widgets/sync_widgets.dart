@@ -6,12 +6,8 @@ import '../../services/sync_service.dart';
 class SyncStatusWidget extends StatelessWidget {
   final bool showDetails;
   final VoidCallback? onTap;
-  
-  const SyncStatusWidget({
-    super.key,
-    this.showDetails = false,
-    this.onTap,
-  });
+
+  const SyncStatusWidget({super.key, this.showDetails = false, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +54,7 @@ class SyncStatusWidget extends StatelessWidget {
       },
     );
   }
-  
+
   Widget _buildStatusIcon(SyncProvider syncProvider) {
     if (syncProvider.status == SyncStatus.syncing) {
       return SizedBox(
@@ -71,18 +67,19 @@ class SyncStatusWidget extends StatelessWidget {
         ),
       );
     }
-    
+
     return Icon(
       syncProvider.getStatusIcon(),
       size: 16,
       color: syncProvider.getStatusColor(),
     );
   }
-  
+
   List<Widget> _buildDetails(BuildContext context, SyncProvider syncProvider) {
     final details = <Widget>[];
-    
-    if (syncProvider.status == SyncStatus.syncing && syncProvider.progress > 0) {
+
+    if (syncProvider.status == SyncStatus.syncing &&
+        syncProvider.progress > 0) {
       details.add(
         LinearProgressIndicator(
           value: syncProvider.progress,
@@ -91,22 +88,21 @@ class SyncStatusWidget extends StatelessWidget {
         ),
       );
     }
-    
+
     if (syncProvider.error != null) {
       details.add(
         Text(
           syncProvider.error!,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.red,
-            fontSize: 11,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: Colors.red, fontSize: 11),
         ),
       );
     }
-    
+
     return details;
   }
-  
+
   Widget _buildPendingBadge(SyncProvider syncProvider) {
     return Container(
       margin: const EdgeInsets.only(left: 8),
@@ -142,10 +138,7 @@ class SyncControlPanel extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(
-                      Icons.sync,
-                      color: Theme.of(context).primaryColor,
-                    ),
+                    Icon(Icons.sync, color: Theme.of(context).primaryColor),
                     const SizedBox(width: 8),
                     Text(
                       'Sincronização',
@@ -158,19 +151,19 @@ class SyncControlPanel extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Status atual
                 SyncStatusWidget(showDetails: true),
                 const SizedBox(height: 16),
-                
+
                 // Controles
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
                     ElevatedButton.icon(
-                      onPressed: syncProvider.status == SyncStatus.syncing 
-                          ? null 
+                      onPressed: syncProvider.status == SyncStatus.syncing
+                          ? null
                           : () => syncProvider.quickSync(),
                       icon: const Icon(Icons.sync, size: 18),
                       label: const Text('Sync Rápido'),
@@ -180,8 +173,8 @@ class SyncControlPanel extends StatelessWidget {
                       ),
                     ),
                     ElevatedButton.icon(
-                      onPressed: syncProvider.status == SyncStatus.syncing 
-                          ? null 
+                      onPressed: syncProvider.status == SyncStatus.syncing
+                          ? null
                           : () => syncProvider.performSync(forceFull: true),
                       icon: const Icon(Icons.refresh, size: 18),
                       label: const Text('Sync Completo'),
@@ -202,11 +195,13 @@ class SyncControlPanel extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Auto Sync Toggle
                 SwitchListTile(
                   title: const Text('Sincronização Automática'),
-                  subtitle: const Text('Sincronizar automaticamente a cada 5 minutos'),
+                  subtitle: const Text(
+                    'Sincronizar automaticamente a cada 5 minutos',
+                  ),
                   value: syncProvider.autoSyncEnabled,
                   onChanged: (value) {
                     if (value) {
@@ -216,7 +211,7 @@ class SyncControlPanel extends StatelessWidget {
                     }
                   },
                 ),
-                
+
                 // Métricas
                 if (syncProvider.lastSyncTime != null) ...[
                   const Divider(),
@@ -229,10 +224,13 @@ class SyncControlPanel extends StatelessWidget {
       },
     );
   }
-  
-  Widget _buildPerformanceBadge(BuildContext context, SyncProvider syncProvider) {
+
+  Widget _buildPerformanceBadge(
+    BuildContext context,
+    SyncProvider syncProvider,
+  ) {
     final isOptimal = syncProvider.isPerformanceOptimal;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -260,24 +258,27 @@ class SyncControlPanel extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildMetrics(BuildContext context, SyncProvider syncProvider) {
     final metrics = syncProvider.getSyncMetrics();
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Métricas de Performance',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         _buildMetricRow('Último Sync:', _formatLastSync(metrics['last_sync'])),
         _buildMetricRow('Mudanças Pendentes:', '${metrics['pending_changes']}'),
-        _buildMetricRow('Performance:', metrics['performance_optimal'] ? '✅ Ótima' : '⚠️ Pode melhorar'),
-        
+        _buildMetricRow(
+          'Performance:',
+          metrics['performance_optimal'] ? '✅ Ótima' : '⚠️ Pode melhorar',
+        ),
+
         const SizedBox(height: 8),
         TextButton.icon(
           onPressed: () => _showPerformanceReport(context, syncProvider),
@@ -287,7 +288,7 @@ class SyncControlPanel extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildMetricRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -300,13 +301,13 @@ class SyncControlPanel extends StatelessWidget {
       ),
     );
   }
-  
+
   String _formatLastSync(String? lastSync) {
     if (lastSync == null) return 'Nunca';
-    
+
     final time = DateTime.parse(lastSync);
     final diff = DateTime.now().difference(time);
-    
+
     if (diff.inMinutes < 1) {
       return 'Há ${diff.inSeconds}s';
     } else if (diff.inHours < 1) {
@@ -315,7 +316,7 @@ class SyncControlPanel extends StatelessWidget {
       return 'Há ${diff.inHours}h';
     }
   }
-  
+
   void _showPerformanceReport(BuildContext context, SyncProvider syncProvider) {
     showDialog(
       context: context,
@@ -349,23 +350,20 @@ class SyncButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final String? text;
   final IconData? icon;
-  
-  const SyncButton({
-    super.key,
-    this.onPressed,
-    this.text,
-    this.icon,
-  });
+
+  const SyncButton({super.key, this.onPressed, this.text, this.icon});
 
   @override
   Widget build(BuildContext context) {
     return Consumer<SyncProvider>(
       builder: (context, syncProvider, child) {
         final isLoading = syncProvider.status == SyncStatus.syncing;
-        
+
         return ElevatedButton.icon(
-          onPressed: isLoading ? null : (onPressed ?? () => syncProvider.smartSync()),
-          icon: isLoading 
+          onPressed: isLoading
+              ? null
+              : (onPressed ?? () => syncProvider.smartSync()),
+          icon: isLoading
               ? const SizedBox(
                   width: 16,
                   height: 16,

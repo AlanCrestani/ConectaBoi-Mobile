@@ -7,14 +7,14 @@ import '../models/lancamento_combustivel.dart';
 import '../shared/widgets/sync_widgets.dart';
 import 'combustivel_form_page.dart';
 
-class CombustivelListPage extends StatefulWidget {
-  const CombustivelListPage({super.key});
+class CombustivelListPageNew extends StatefulWidget {
+  const CombustivelListPageNew({super.key});
 
   @override
-  State<CombustivelListPage> createState() => _CombustivelListPageState();
+  State<CombustivelListPageNew> createState() => _CombustivelListPageNewState();
 }
 
-class _CombustivelListPageState extends State<CombustivelListPage> {
+class _CombustivelListPageNewState extends State<CombustivelListPageNew> {
   String? _filtroTipo;
   String? _filtroEquipamento;
   DateTime? _dataInicio;
