@@ -10,6 +10,7 @@ import 'presentation/pages/auth_callback_page.dart';
 import 'presentation/pages/dashboard_combustivel_page.dart';
 import 'presentation/pages/nova_entrada_combustivel_page.dart';
 import 'providers/combustivel_provider.dart';
+import 'providers/sync_provider.dart';
 import 'pages/combustivel_list_page.dart';
 import 'core/constants/app_routes.dart';
 
@@ -53,6 +54,10 @@ class ConectaBoiApp extends StatelessWidget {
             });
             return authService;
           },
+        ),
+        // 🚀 SYNC PROVIDER - PERFORMANCE OTIMIZADA
+        ChangeNotifierProvider<SyncProvider>(
+          create: (context) => SyncProvider(),
         ),
         // Provider para controle de combustível
         ChangeNotifierProvider<CombustivelProvider>(

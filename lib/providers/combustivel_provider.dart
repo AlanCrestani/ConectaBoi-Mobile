@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/lancamento_combustivel.dart';
 import '../services/combustivel_service.dart';
+import '../services/sync_service.dart';
+import '../core/services/performance_monitor.dart';
 
 class CombustivelProvider extends ChangeNotifier {
   final CombustivelService _service = CombustivelService();
+  final SyncService _syncService = SyncService();
+  final PerformanceMonitor _monitor = PerformanceMonitor();
 
   List<LancamentoCombustivel> _lancamentos = [];
   bool _isLoading = false;
@@ -15,38 +19,52 @@ class CombustivelProvider extends ChangeNotifier {
   String? get error => _error;
   Map<String, dynamic>? get estatisticas => _estatisticas;
 
-  // Buscar todos os lançamentos
+  // ⚡ BUSCAR COM PERFORMANCE OTIMIZADA
   Future<void> carregarLancamentos() async {
+    final timer = _monitor.startTimer('load_lancamentos');
     _setLoading(true);
+    
     try {
       _lancamentos = await _service.buscarLancamentos();
       _error = null;
+      
+      // Auto-sync se necessário
+      _triggerAutoSync();
+      
     } catch (e) {
       _error = e.toString();
     } finally {
+      timer.stop();
+      _monitor.logMetric('load_lancamentos_ms', timer.elapsedMilliseconds);
       _setLoading(false);
     }
   }
 
-  // Buscar lançamentos por período
+  // 🚀 BUSCAR POR PERÍODO COM CACHE
   Future<void> carregarLancamentosPorPeriodo(
     DateTime inicio,
     DateTime fim,
   ) async {
+    final timer = _monitor.startTimer('load_periodo');
     _setLoading(true);
+    
     try {
       _lancamentos = await _service.buscarLancamentosPorPeriodo(inicio, fim);
       _error = null;
     } catch (e) {
       _error = e.toString();
     } finally {
+      timer.stop();
+      _monitor.logMetric('load_periodo_ms', timer.elapsedMilliseconds);
       _setLoading(false);
     }
   }
 
   // Buscar lançamentos por confinamento
   Future<void> carregarLancamentosPorConfinamento(String confinamentoId) async {
+    final timer = _monitor.startTimer('load_confinamento');
     _setLoading(true);
+    
     try {
       _lancamentos = await _service.buscarLancamentosPorConfinamento(
         confinamentoId,
@@ -55,13 +73,17 @@ class CombustivelProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
     } finally {
+      timer.stop();
+      _monitor.logMetric('load_confinamento_ms', timer.elapsedMilliseconds);
       _setLoading(false);
     }
   }
 
-  // Criar novo lançamento
+  // 🚀 CRIAR COM SYNC OTIMIZADO
   Future<bool> criarLancamento(LancamentoCombustivel lancamento) async {
+    final timer = _monitor.startTimer('create_lancamento');
     _setLoading(true);
+    
     try {
       // Validar lançamento
       final erros = await _service.validarLancamento(lancamento);
@@ -73,18 +95,26 @@ class CombustivelProvider extends ChangeNotifier {
       final novoLancamento = await _service.criarLancamento(lancamento);
       _lancamentos.insert(0, novoLancamento);
       _error = null;
+      
+      // Add to sync queue for offline support
+      await _syncService.addPendingChange('create', novoLancamento.toJson());
+      
       return true;
     } catch (e) {
       _error = e.toString();
       return false;
     } finally {
+      timer.stop();
+      _monitor.logMetric('create_lancamento_ms', timer.elapsedMilliseconds);
       _setLoading(false);
     }
   }
 
-  // Atualizar lançamento
+  // ⚡ ATUALIZAR COM PERFORMANCE
   Future<bool> atualizarLancamento(LancamentoCombustivel lancamento) async {
+    final timer = _monitor.startTimer('update_lancamento');
     _setLoading(true);
+    
     try {
       // Validar lançamento
       final erros = await _service.validarLancamento(lancamento);
@@ -101,27 +131,41 @@ class CombustivelProvider extends ChangeNotifier {
         _lancamentos[index] = lancamentoAtualizado;
       }
       _error = null;
+      
+      // Add to sync queue
+      await _syncService.addPendingChange('update', lancamentoAtualizado.toJson());
+      
       return true;
     } catch (e) {
       _error = e.toString();
       return false;
     } finally {
+      timer.stop();
+      _monitor.logMetric('update_lancamento_ms', timer.elapsedMilliseconds);
       _setLoading(false);
     }
   }
 
-  // Deletar lançamento
+  // 🗑️ DELETAR COM SYNC
   Future<bool> deletarLancamento(String id) async {
+    final timer = _monitor.startTimer('delete_lancamento');
     _setLoading(true);
+    
     try {
       await _service.deletarLancamento(id);
       _lancamentos.removeWhere((l) => l.id == id);
       _error = null;
+      
+      // Add to sync queue
+      await _syncService.addPendingChange('delete', {'id': id});
+      
       return true;
     } catch (e) {
       _error = e.toString();
       return false;
     } finally {
+      timer.stop();
+      _monitor.logMetric('delete_lancamento_ms', timer.elapsedMilliseconds);
       _setLoading(false);
     }
   }
@@ -193,6 +237,23 @@ class CombustivelProvider extends ChangeNotifier {
     final operadores = _lancamentos.map((l) => l.operador).toSet().toList();
     operadores.sort();
     return operadores;
+  }
+
+  // 🔄 AUTO SYNC TRIGGER
+  void _triggerAutoSync() {
+    // Trigger sync se há dados carregados e não está em sync
+    if (_lancamentos.isNotEmpty) {
+      _syncService.syncData(forceFull: false).catchError((e) {
+        // Silent fail for auto-sync
+        print('Auto-sync failed: $e');
+        return false;
+      });
+    }
+  }
+
+  // 📊 PERFORMANCE METRICS
+  Map<String, dynamic> getPerformanceMetrics() {
+    return _monitor.getAllMetrics();
   }
 
   // Limpar dados

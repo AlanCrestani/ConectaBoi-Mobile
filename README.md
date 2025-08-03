@@ -9,17 +9,20 @@ Aplicativo móvel para controle e gerenciamento de combustível em fazendas e co
 ## 📱 Funcionalidades
 
 ### ✅ Autenticação
+
 - **Login OAuth Google** - Integração completa e segura
 - **Sessões persistentes** com refresh token automático
 - **Controle de acesso** baseado em perfis de usuário
 
 ### ✅ Dashboard Principal
+
 - **Resumo executivo** com métricas do dia
 - **Status dos tanques** em tempo real
 - **Alertas críticos** e notificações
 - **Ações rápidas** para navegação
 
 ### ✅ Controle de Combustível
+
 - **CRUD completo** de lançamentos
 - **Filtros avançados** por período, tipo, equipamento
 - **Validação de dados** em tempo real
@@ -27,6 +30,7 @@ Aplicativo móvel para controle e gerenciamento de combustível em fazendas e co
 - **Estatísticas** e relatórios
 
 ### ✅ Interface Moderna
+
 - **Design responsivo** para web e mobile
 - **Material Design** com tema escuro/claro
 - **Estados de loading** e feedback visual
@@ -61,6 +65,7 @@ lib/
 ## � Como Executar
 
 ### Pré-requisitos
+
 - Flutter 3.32.8 ou superior
 - Dart SDK
 - Chrome (para desenvolvimento web)
@@ -68,22 +73,27 @@ lib/
 - Projeto no Google Console configurado
 
 ### Configuração
+
 1. Clone o repositório:
+
 ```bash
 git clone https://github.com/AlanCrestani/ConectaBoi-Mobile.git
 cd ConectaBoi-Mobile
 ```
 
 2. Instale as dependências:
+
 ```bash
 flutter pub get
 ```
 
 3. Configure as variáveis de ambiente:
+
 - Supabase URL e Anon Key em `lib/core/constants/supabase_config.dart`
 - OAuth redirect URLs no Supabase Dashboard
 
 ### Execução
+
 ```bash
 # Desenvolvimento Web (porta fixa 3000)
 flutter run -d chrome --web-port=3000
@@ -98,6 +108,7 @@ flutter run -d ios
 ## �️ Modelo de Dados
 
 ### LançamentoCombustível
+
 ```dart
 {
   id: String?                   // UUID gerado automaticamente
@@ -134,17 +145,18 @@ flutter run -d ios
 ```yaml
 dependencies:
   flutter: sdk
-  supabase_flutter: ^2.5.6      # Backend integration
-  provider: ^6.1.2              # State management
-  google_sign_in: ^6.2.1        # OAuth Google
-  intl: ^0.19.0                 # Internationalization
-  http: ^1.1.0                  # HTTP requests
-  shared_preferences: ^2.2.2     # Local storage
+  supabase_flutter: ^2.5.6 # Backend integration
+  provider: ^6.1.2 # State management
+  google_sign_in: ^6.2.1 # OAuth Google
+  intl: ^0.19.0 # Internationalization
+  http: ^1.1.0 # HTTP requests
+  shared_preferences: ^2.2.2 # Local storage
 ```
 
 ## 🎯 Status do Projeto
 
 ### ✅ Funcionalidades Implementadas
+
 - [x] Autenticação OAuth Google
 - [x] Dashboard com métricas
 - [x] CRUD de lançamentos de combustível
@@ -155,6 +167,7 @@ dependencies:
 - [x] Integração Supabase completa
 
 ### 🔄 Próximas Funcionalidades
+
 - [ ] Relatórios PDF
 - [ ] Gráficos e analytics
 - [ ] Notificações push
@@ -166,6 +179,7 @@ dependencies:
 ## 🔐 Configuração OAuth
 
 ### Google Console
+
 1. Acesse o [Google Cloud Console](https://console.cloud.google.com/)
 2. Configure OAuth 2.0 client IDs
 3. Adicione URLs autorizadas:
@@ -173,6 +187,7 @@ dependencies:
    - Seu domínio de produção
 
 ### Supabase
+
 1. Configure Provider OAuth Google
 2. Adicione redirect URLs:
    - `http://localhost:3000/auth/callback`
@@ -182,6 +197,7 @@ dependencies:
 ## 👨‍💻 Desenvolvedor
 
 **Alan Crestani**
+
 - GitHub: [@AlanCrestani](https://github.com/AlanCrestani)
 
 ## 📄 Licença
